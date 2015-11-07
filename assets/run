@@ -1,4 +1,12 @@
 #!/bin/bash
 
 python /app/init.py start
+
+echo "If you should exec extra setting, put them in /app/init_app.py"
+
+if [ -f /app/init_app.py ];
+then
+  python /app/init_app.py
+fi
+
 exec /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
