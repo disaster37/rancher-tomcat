@@ -37,7 +37,7 @@ RUN useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat
 RUN chown -R tomcat:tomcat /opt/tomcat
 
 # Add main script
-ADD assets/setup/supervisor-tomcat.conf
+ADD assets/setup/supervisor-tomcat.conf /etc/supervisor/conf.d/tomcat.conf
 ADD assets/init.py /app/init.py
 ADD assets/run /app/run
 RUN chmod 755 /app/init.py
