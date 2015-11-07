@@ -31,11 +31,23 @@ RUN rm -rf /opt/tomcat/webapps/ROOT
 ENV CATALINA_HOME /opt/tomcat
 ENV PATH $PATH:$CATALINA_HOME/bin
 
+# Add account
+RUN groupadd tomcat
+RUN useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat
+RUN chown -R tomcat:tomcat /opt/tomcat
+
+# Add main script
+ADD assets/setup/supervisor-tomcat.conf
+ADD assets/init.py /app/init.py
+ADD assets/run /app/run
+RUN chmod 755 /app/init.py
+RUN chmod 755 /app/run
+
 EXPOSE 8080
 EXPOSE 8009
 VOLUME "/opt/tomcat/webapps"
 WORKDIR /opt/tomcat
 
 # Launch Tomcat
-CMD ["/opt/tomcat/bin/catalina.sh", "run"]
+CMD ["/app/run"]
 
