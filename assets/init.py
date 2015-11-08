@@ -1,3 +1,6 @@
+__author__ = 'sebastien'
+
+
 #!/usr/bin/python
 import os
 import re
@@ -13,11 +16,17 @@ class ServiceRun():
 
 
 
-  def run(self):
+  def run(self, list_config, path):
+
+    if list_config is None:
+        raise KeyError("You must set the list_config")
+
+    if path is None or path == '':
+        raise KeyError("You must set the path")
 
     while True:
         try:
-            status = self.set_tomcat_cluster()
+            status = self.set_app_setting(list_config, path)
             if status == True:
                 break
         except Exception,e:
@@ -26,77 +35,16 @@ class ServiceRun():
         print("We try again in 60s")
         time.sleep(60)
 
-    print("Setting done")
+    print("Setting app done")
 
 
 
-  def set_tomcat_user(self):
 
-    print("@todo")
-
-
-  def set_tomcat_cluster(self):
+  def set_app_setting(self, list_config, path):
     global TOMCAT_PATH
 
-    metadata_manager = MetadataAPI()
-
-    # I check there are more than 1 container
-    number_node = metadata_manager.get_service_scale_size()
-    if number_node < 2 :
-        print("No cluster setting needed")
-        return True
-
-    print("We will setting Tomcat cluster with " + str(number_node) + " instances")
-
-    # I get my container info
-    my_name = metadata_manager.get_container_name()
-    my_ip = metadata_manager.get_container_ip()
-    my_id = metadata_manager.get_container_id()
-
-    # I get the other container info
-    list_containers = {}
-    list_containers_name = metadata_manager.get_service_containers()
-    for container_name in list_containers_name:
-        if container_name != my_name:
-            list_containers[container_name] = {}
-            list_containers[container_name]['id'] = metadata_manager.get_container_id(container_name)
-            list_containers[container_name]['name'] = container_name
-            list_containers[container_name]['ip'] = metadata_manager.get_container_ip(container_name)
-            if list_containers[container_name]['ip'] is None or list_containers[container_name]['ip'] == '':
-                print("The container " + container_name + " have not yet the IP. We stay it")
-                return False
-
-    # We set the engine name
-    self.replace_all(TOMCAT_PATH + '/conf/server.xml', re.escape('<Engine name="Catalina" defaultHost="localhost">'), '<Engine name="Catalina" defaultHost="localhost" jvmRoute="' + my_name + '">')
-
-    # We set the cluster
-    cluster_setting = '''
-    <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster" channelSendOptions="6" channelStartOptions="3">
-
-        <Manager className="org.apache.catalina.ha.session.DeltaManager" expireSessionsOnShutdown="false" notifyListenersOnReplication="true" />
-
-        <Channel className="org.apache.catalina.tribes.group.GroupChannel">
-
-            <Receiver className="org.apache.catalina.tribes.transport.nio.NioReceiver" autoBind="0" selectorTimeout="5000" maxThreads="6" address="''' + my_ip + '''" port="4444" />
-                <Sender className="org.apache.catalina.tribes.transport.ReplicationTransmitter">
-                    <Transport className="org.apache.catalina.tribes.transport.nio.PooledParallelSender" timeout="60000" keepAliveTime="10" keepAliveCount="0" />
-                </Sender>
-                <Interceptor className="org.apache.catalina.tribes.group.interceptors.TcpPingInterceptor" staticOnly="true"/>
-                <Interceptor className="org.apache.catalina.tribes.group.interceptors.TcpFailureDetector"/>
-                <Interceptor className="org.apache.catalina.tribes.group.interceptors.StaticMembershipInterceptor">'''
-
-    for container in list_containers.itervalues():
-        cluster_setting += '<Member className="org.apache.catalina.tribes.membership.StaticMember" host="' + container['ip'] + '" port="4444" uniqueId="{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' + str(container['id']) + '}"/>'
-    cluster_setting += '''
-                </Interceptor>
-        </Channel>
-        <Valve className="org.apache.catalina.ha.tcp.ReplicationValve" filter="" />
-        <Valve className="org.apache.catalina.ha.session.JvmRouteBinderValve" />
-        <ClusterListener className="org.apache.catalina.ha.session.JvmRouteSessionIDBinderListener"/>
-        <ClusterListener className="org.apache.catalina.ha.session.ClusterSessionListener"/>
-    </Cluster>
-    '''
-    self.replace_all(TOMCAT_PATH + '/conf/server.xml', re.escape('</Host>'), cluster_setting + "\n" + '</Host>')
+    for key, value in list_config.iteritems():
+        self.replace_all(TOMCAT_PATH + '/' + path, re.escape(key) + '\s*=.*', key + '=' + value)
 
     return True
 
@@ -141,9 +89,56 @@ class ServiceRun():
 
 if __name__ == '__main__':
     # Start
-    if(len(sys.argv) > 1 and sys.argv[1] == "start"):
 
-        service = ServiceRun()
-        service.run()
+    list_config = {}
 
+    # Database setting
+    if os.getenv('EQUARIUS_DB_INIT') is None:
+        list_config['database.init'] = 'false'
+    else:
+        list_config['database.init'] = 'true'
 
+    if os.getenv('DB_ENV_DB') is None:
+        raise KeyError('No DB name setting. Are you sure you have link postgresql with the name DB ?')
+    if os.getenv('DB_ENV_USER') is None:
+        raise KeyError('No user setting for DB. Are you sure you have link postgresql with the name DB ?')
+    if os.getenv('DB_ENV_PASS') is None:
+        raise KeyError('No password setting for DB. Are you sure you have link postgresql with the name DB ?')
+    list_config['dataSource.url'] = 'jdbc:postgresql://db:5432/' + os.getenv('DB_ENV_DB')
+    list_config['dataSource.username'] = os.getenv('DB_ENV_USER')
+    list_config['dataSource.password'] = os.getenv('DB_ENV_PASS')
+
+    #Mail setting
+    if os.getenv('EQUARIUS_SMTP_HOST') is not None:
+        list_config['mailSender.host'] = os.getenv('EQUARIUS_SMTP_HOST')
+    if os.getenv('EQUARIUS_SMTP_PORT') is not None:
+        list_config['mailSender.port'] = os.getenv('EQUARIUS_SMTP_PORT')
+    if os.getenv('EQUARIUS_SMTP_LOGIN') is not None:
+        list_config['mailSender.username'] = os.getenv('EQUARIUS_SMTP_LOGIN')
+    if os.getenv('EQUARIUS_SMTP_PASS') is not None:
+        list_config['mailSender.password'] = os.getenv('EQUARIUS_SMTP_PASS')
+
+    # Captcha setting
+    if os.getenv('EQUARIUS_CAPTCHA_PRIVATE') is not None:
+        list_config['reCaptcha.privateKey'] = os.getenv('EQUARIUS_CAPTCHA_PRIVATE')
+    if os.getenv('EQUARIUS_CAPTCHA_PUBLIC') is not None:
+        list_config['reCaptcha.publicKey'] = os.getenv('EQUARIUS_CAPTCHA_PUBLIC')
+
+    # Domain setting
+    if os.getenv('EQUARIUS_URL') is not None:
+        list_config['urlGeneratorService.webDomain'] = os.getenv('EQUARIUS_URL')
+    if os.getenv('EQUARIUS_PORT') is not None:
+        list_config['urlGeneratorService.webProtocol'] = os.getenv('EQUARIUS_PORT')
+    if os.getenv('EQUARIUS_CRYPTO_KEY') is not None:
+        list_config['cryptoService.twoFishKey'] = os.getenv('EQUARIUS_CRYPTO_KEY')
+
+    # User account setting
+    if os.getenv('EQUARIUS_ACCOUNT_ACTIVATED_WAIT') is not None:
+        list_config['user.not.activated.duration'] = os.getenv('EQUARIUS_ACCOUNT_ACTIVATED_WAIT')
+    if os.getenv('EQUARIUS_ACCOUNT_NO_ACTIVITY_WAIT') is not None:
+        list_config['user.not.enable.duration'] = os.getenv('EQUARIUS_ACCOUNT_NO_ACTIVITY_WAIT')
+    if os.getenv('EQUARIUS_ACCOUNT_NO_ACTIVITY__REAL_WAIT') is not None:
+        list_config['user.not.enable.duration.real'] = os.getenv('EQUARIUS_ACCOUNT_NO_ACTIVITY__REAL_WAIT')
+
+    service = ServiceRun()
+    service.run(list_config, 'e-quarius/config.properties')
