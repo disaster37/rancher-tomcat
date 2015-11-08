@@ -91,6 +91,7 @@ class ServiceRun():
                 </Interceptor>
         </Channel>
         <Valve className="org.apache.catalina.ha.tcp.ReplicationValve" filter="" />
+        <Valve className="org.apache.catalina.ha.session.JvmRouteBinderValve"/>
         <ClusterListener className="org.apache.catalina.ha.session.ClusterSessionListener"/>
     </Cluster>
     '''

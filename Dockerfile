@@ -42,6 +42,7 @@ ADD assets/init.py /app/init.py
 ADD assets/run /app/run
 RUN chmod 755 /app/init.py
 RUN chmod 755 /app/run
+RUN touch /firstrun
 
 EXPOSE 8080
 EXPOSE 8009
