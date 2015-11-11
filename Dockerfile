@@ -4,6 +4,9 @@ MAINTAINER Sebastien LANGOUREAUX <linuxworkgroup@hotmail.com>
 ENV TOMCAT_BRANCH 8
 ENV TOMCAT_VERSION 8.0.28
 
+# Force Tomcat to bind on IPV4
+ENV _JAVA_OPTIONS -Djava.net.preferIPv4Stack=true
+
 # Install JDK 8
 RUN \
 echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \

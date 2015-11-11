@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import os
 import re
+import shutil
 import sys
 import time
 from rancher_metadata import MetadataAPI
@@ -15,9 +16,12 @@ class ServiceRun():
 
   def run(self):
 
+    # We put tomcat on original state or if it's first run, we copy the original config
+    self.__do_tomcat_original_setting()
+
     while True:
         try:
-            status = self.set_tomcat_cluster()
+            status = self.__set_tomcat_cluster()
             if status == True:
                 break
         except Exception,e:
@@ -30,12 +34,23 @@ class ServiceRun():
 
 
 
-  def set_tomcat_user(self):
+  def __set_tomcat_user(self):
 
     print("@todo")
 
+  def __do_tomcat_original_setting(self):
+      global TOMCAT_PATH
 
-  def set_tomcat_cluster(self):
+      # All other run
+      if os.path.isfile(TOMCAT_PATH + '/conf/server.xml.org'):
+          shutil.copy2(TOMCAT_PATH + '/conf/server.xml.org', TOMCAT_PATH + '/conf/server.xml')
+
+      # First run
+      else:
+          shutil.copy2(TOMCAT_PATH + '/conf/server.xml', TOMCAT_PATH + '/conf/server.xml.org')
+
+
+  def __set_tomcat_cluster(self):
     global TOMCAT_PATH
 
     metadata_manager = MetadataAPI()
