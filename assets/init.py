@@ -92,16 +92,17 @@ class ServiceRun():
 
         <Channel className="org.apache.catalina.tribes.group.GroupChannel">
 
-            <Receiver className="org.apache.catalina.tribes.transport.nio.NioReceiver" autoBind="0" selectorTimeout="5000" maxThreads="6" address="''' + my_ip + '''" port="4444" />
+            <Receiver className="org.apache.catalina.tribes.transport.nio.NioReceiver" autoBind="100" selectorTimeout="5000" maxThreads="6" address="''' + my_ip + '''" port="4444" />
                 <Sender className="org.apache.catalina.tribes.transport.ReplicationTransmitter">
-                    <Transport className="org.apache.catalina.tribes.transport.nio.PooledParallelSender" timeout="60000" keepAliveTime="10" keepAliveCount="0" />
+                    <Transport className="org.apache.catalina.tribes.transport.nio.PooledParallelSender" />
                 </Sender>
+		<Interceptor className="org.apache.catalina.tribes.group.interceptors.TcpPingInterceptor"/>
                 <Interceptor className="org.apache.catalina.tribes.group.interceptors.TcpFailureDetector"/>
                 <Interceptor className="org.apache.catalina.tribes.group.interceptors.MessageDispatch15Interceptor"/>
                 <Interceptor className="org.apache.catalina.tribes.group.interceptors.StaticMembershipInterceptor">'''
 
     for container in list_containers.itervalues():
-        cluster_setting += '<Member className="org.apache.catalina.tribes.membership.StaticMember" host="' + container['ip'] + '" port="4444" uniqueId="{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' + str(container['id']) + '}"/>'
+        cluster_setting += '<Member className="org.apache.catalina.tribes.membership.StaticMember" securePort="-1" domain="delta-static" host="' + container['ip'] + '" port="4444" uniqueId="{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' + str(container['id']) + '}"/>'
     cluster_setting += '''
                 </Interceptor>
         </Channel>
