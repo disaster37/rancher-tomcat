@@ -49,7 +49,7 @@ class ServiceRun():
       # First run
       else:
           shutil.copy2(TOMCAT_PATH + '/conf/server.xml', TOMCAT_PATH + '/conf/server.xml.org')
-          shutil.copy2(TOMCAT_PATH + '/conf/context.xml', TOMCAT_PATH + '/conf/context.xml')
+          shutil.copy2(TOMCAT_PATH + '/conf/context.xml', TOMCAT_PATH + '/conf/context.xml.org')
 
 
   def __set_tomcat_cluster(self):
@@ -96,7 +96,6 @@ class ServiceRun():
                 <Sender className="org.apache.catalina.tribes.transport.ReplicationTransmitter">
                     <Transport className="org.apache.catalina.tribes.transport.nio.PooledParallelSender" timeout="60000" keepAliveTime="10" keepAliveCount="0" />
                 </Sender>
-                <Interceptor className="org.apache.catalina.tribes.group.interceptors.TcpPingInterceptor"/>
                 <Interceptor className="org.apache.catalina.tribes.group.interceptors.TcpFailureDetector"/>
                 <Interceptor className="org.apache.catalina.tribes.group.interceptors.MessageDispatch15Interceptor"/>
                 <Interceptor className="org.apache.catalina.tribes.group.interceptors.StaticMembershipInterceptor">'''
