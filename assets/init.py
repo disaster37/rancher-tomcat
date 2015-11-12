@@ -44,10 +44,12 @@ class ServiceRun():
       # All other run
       if os.path.isfile(TOMCAT_PATH + '/conf/server.xml.org'):
           shutil.copy2(TOMCAT_PATH + '/conf/server.xml.org', TOMCAT_PATH + '/conf/server.xml')
+          shutil.copy2(TOMCAT_PATH + '/conf/context.xml.org', TOMCAT_PATH + '/conf/context.xml')
 
       # First run
       else:
           shutil.copy2(TOMCAT_PATH + '/conf/server.xml', TOMCAT_PATH + '/conf/server.xml.org')
+          shutil.copy2(TOMCAT_PATH + '/conf/context.xml', TOMCAT_PATH + '/conf/context.xml')
 
 
   def __set_tomcat_cluster(self):
@@ -88,16 +90,15 @@ class ServiceRun():
     cluster_setting = '''
     <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster" channelSendOptions="6" channelStartOptions="3">
 
-        <Manager className="org.apache.catalina.ha.session.DeltaManager" expireSessionsOnShutdown="false" notifyListenersOnReplication="true" />
-
         <Channel className="org.apache.catalina.tribes.group.GroupChannel">
 
             <Receiver className="org.apache.catalina.tribes.transport.nio.NioReceiver" autoBind="0" selectorTimeout="5000" maxThreads="6" address="''' + my_ip + '''" port="4444" />
                 <Sender className="org.apache.catalina.tribes.transport.ReplicationTransmitter">
                     <Transport className="org.apache.catalina.tribes.transport.nio.PooledParallelSender" timeout="60000" keepAliveTime="10" keepAliveCount="0" />
                 </Sender>
-                <Interceptor className="org.apache.catalina.tribes.group.interceptors.TcpPingInterceptor" staticOnly="true"/>
+                <Interceptor className="org.apache.catalina.tribes.group.interceptors.TcpPingInterceptor"/>
                 <Interceptor className="org.apache.catalina.tribes.group.interceptors.TcpFailureDetector"/>
+                <Interceptor className="org.apache.catalina.tribes.group.interceptors.MessageDispatch15Interceptor"/>
                 <Interceptor className="org.apache.catalina.tribes.group.interceptors.StaticMembershipInterceptor">'''
 
     for container in list_containers.itervalues():
@@ -111,6 +112,8 @@ class ServiceRun():
     </Cluster>
     '''
     self.replace_all(TOMCAT_PATH + '/conf/server.xml', re.escape('</Host>'), cluster_setting + "\n" + '</Host>')
+
+    self.replace_all(TOMCAT_PATH + '/conf/context.xml', re.escape('</Context>'), '<Manager className="org.apache.catalina.ha.session.DeltaManager" expireSessionsOnShutdown="false" notifyListenersOnReplication="true" /></Context>')
 
     return True
 
