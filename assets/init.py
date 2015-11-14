@@ -104,7 +104,7 @@ class ServiceRun():
 
         <Channel className="org.apache.catalina.tribes.group.GroupChannel">
 
-            <Receiver className="org.apache.catalina.tribes.transport.nio.NioReceiver" autoBind="100" selectorTimeout="5000" maxThreads="6" address="''' + my_ip + '''" port="4444" />
+            <Receiver className="org.apache.catalina.tribes.transport.nio.NioReceiver" autoBind="9" selectorTimeout="5000" maxThreads="6" address="''' + my_ip + '''" port="4444" />
                 <Sender className="org.apache.catalina.tribes.transport.ReplicationTransmitter">
                     <Transport className="org.apache.catalina.tribes.transport.nio.PooledParallelSender" />
                 </Sender>
@@ -130,7 +130,7 @@ class ServiceRun():
 
     </Cluster>
     '''
-    self.replace_all(TOMCAT_PATH + '/conf/server.xml', re.escape('</Host>'), cluster_setting + "\n" + '</Host>')
+    self.replace_all(TOMCAT_PATH + '/conf/server.xml', re.escape('</Engine>'), cluster_setting + "\n" + '</Engine>')
 
     self.replace_all(TOMCAT_PATH + '/conf/context.xml', re.escape('</Context>'), '<Manager className="org.apache.catalina.ha.session.DeltaManager" expireSessionsOnShutdown="false" notifyListenersOnReplication="true" /></Context>')
 
