@@ -92,7 +92,7 @@ class ServiceRun():
 
         <Channel className="org.apache.catalina.tribes.group.GroupChannel">
 
-            <Receiver className="org.apache.catalina.tribes.transport.nio.NioReceiver" domain="delta-static" autoBind="100" selectorTimeout="5000" maxThreads="6" address="''' + my_ip + '''" port="4444" />
+            <Receiver className="org.apache.catalina.tribes.transport.nio.NioReceiver" autoBind="100" selectorTimeout="5000" maxThreads="6" address="''' + my_ip + '''" port="4444" />
                 <Sender className="org.apache.catalina.tribes.transport.ReplicationTransmitter">
                     <Transport className="org.apache.catalina.tribes.transport.nio.PooledParallelSender" />
                 </Sender>
