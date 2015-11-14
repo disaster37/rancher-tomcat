@@ -102,7 +102,7 @@ class ServiceRun():
                 <Interceptor className="org.apache.catalina.tribes.group.interceptors.StaticMembershipInterceptor">'''
 
     for container in list_containers.itervalues():
-        cluster_setting += '<Member className="org.apache.catalina.tribes.membership.StaticMember" securePort="-1" domain="delta-static" host="' + container['ip'] + '" port="4444" uniqueId="{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' + str(container['id']) + '}"/>'
+        cluster_setting += '<Member className="org.apache.catalina.tribes.membership.StaticMember" securePort="-1" host="' + container['ip'] + '" port="4444" uniqueId="{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' + str(container['id']) + '}"/>'
     cluster_setting += '''
                 </Interceptor>
         </Channel>
