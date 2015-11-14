@@ -63,6 +63,9 @@ class ServiceRun():
         print("No cluster setting needed")
         return True
 
+
+
+
     print("We will setting Tomcat cluster with " + str(number_node) + " instances")
 
     # I get my container info
@@ -73,6 +76,7 @@ class ServiceRun():
     # I get the other container info
     list_containers = {}
     list_containers_name = metadata_manager.get_service_containers()
+    first_container = True
     for container_name in list_containers_name:
         if container_name != my_name:
             list_containers[container_name] = {}
@@ -83,6 +87,14 @@ class ServiceRun():
                 print("The container " + container_name + " have not yet the IP. We stay it")
                 return False
 
+            if list_containers[container_name]['id'] < my_id:
+                first_container = False
+
+    # If I am not the first container, I wait some times that the first start
+    if first_container is False:
+        print("I wait 300s that the first container run before start (issue about cluster")
+        time.sleep(300)
+        
     # We set the engine name
     self.replace_all(TOMCAT_PATH + '/conf/server.xml', re.escape('<Engine name="Catalina" defaultHost="localhost">'), '<Engine name="Catalina" defaultHost="localhost" jvmRoute="' + my_name + '">')
 
