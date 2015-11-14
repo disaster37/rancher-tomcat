@@ -121,11 +121,12 @@ class ServiceRun():
         <Valve className="org.apache.catalina.ha.tcp.ReplicationValve" filter="" />
         <Valve className="org.apache.catalina.ha.session.JvmRouteBinderValve"/>
         <ClusterListener className="org.apache.catalina.ha.session.ClusterSessionListener"/>
+        <Manager className="org.apache.catalina.ha.session.DeltaManager" expireSessionsOnShutdown="false" notifyListenersOnReplication="true" />
     </Cluster>
     '''
-    self.replace_all(TOMCAT_PATH + '/conf/server.xml', re.escape('</Engine>'), cluster_setting + "\n" + '</Engine>')
+    self.replace_all(TOMCAT_PATH + '/conf/server.xml', re.escape('</Host>'), cluster_setting + "\n" + '</Host>')
 
-    self.replace_all(TOMCAT_PATH + '/conf/context.xml', re.escape('</Context>'), '<Manager className="org.apache.catalina.ha.session.DeltaManager" expireSessionsOnShutdown="false" notifyListenersOnReplication="true" /></Context>')
+    #self.replace_all(TOMCAT_PATH + '/conf/context.xml', re.escape('</Context>'), '<Manager className="org.apache.catalina.ha.session.DeltaManager" expireSessionsOnShutdown="false" notifyListenersOnReplication="true" /></Context>')
 
     return True
 
