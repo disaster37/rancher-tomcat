@@ -114,19 +114,26 @@ class ServiceRun():
                 <Interceptor className="org.apache.catalina.tribes.group.interceptors.StaticMembershipInterceptor">'''
 
     for container in list_containers.itervalues():
-        cluster_setting += '<Member className="org.apache.catalina.tribes.membership.StaticMember" securePort="-1" domain="stage-delta" host="' + container['ip'] + '" port="4444" uniqueId="{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' + str(container['id']) + '}"/>'
+        cluster_setting += '<Member className="org.apache.catalina.tribes.membership.StaticMember" securePort="-1" domain="cluster" host="' + container['ip'] + '" port="4444" uniqueId="{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,' + str(container['id']) + '}"/>'
     cluster_setting += '''
                 </Interceptor>
         </Channel>
         <Valve className="org.apache.catalina.ha.tcp.ReplicationValve" filter="" />
         <Valve className="org.apache.catalina.ha.session.JvmRouteBinderValve"/>
         <ClusterListener className="org.apache.catalina.ha.session.ClusterSessionListener"/>
-        <Manager className="org.apache.catalina.ha.session.DeltaManager" expireSessionsOnShutdown="false" notifyListenersOnReplication="true" />
+        <ClusterListener className="org.apache.catalina.ha.session.JvmRouteSessionIDBinderListener"/>
+        
+        <Deployer className="org.apache.catalina.ha.deploy.FarmWarDeployer"
+                    		tempDir="/tmp/war-temp/"
+                    		deployDir="/tmp/war-deploy/"
+                    		watchDir="/tmp/war-listen/"
+                    		watchEnabled="false"/>
+
     </Cluster>
     '''
     self.replace_all(TOMCAT_PATH + '/conf/server.xml', re.escape('</Host>'), cluster_setting + "\n" + '</Host>')
 
-    #self.replace_all(TOMCAT_PATH + '/conf/context.xml', re.escape('</Context>'), '<Manager className="org.apache.catalina.ha.session.DeltaManager" expireSessionsOnShutdown="false" notifyListenersOnReplication="true" /></Context>')
+    self.replace_all(TOMCAT_PATH + '/conf/context.xml', re.escape('</Context>'), '<Manager className="org.apache.catalina.ha.session.DeltaManager" expireSessionsOnShutdown="false" notifyListenersOnReplication="true" /></Context>')
 
     return True
 
