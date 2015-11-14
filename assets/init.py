@@ -121,8 +121,7 @@ class ServiceRun():
         <Valve className="org.apache.catalina.ha.tcp.ReplicationValve" filter="" />
         <Valve className="org.apache.catalina.ha.session.JvmRouteBinderValve"/>
         <ClusterListener className="org.apache.catalina.ha.session.ClusterSessionListener"/>
-        <ClusterListener className="org.apache.catalina.ha.session.JvmRouteSessionIDBinderListener"/>
-        
+
         <Deployer className="org.apache.catalina.ha.deploy.FarmWarDeployer"
                     		tempDir="/tmp/war-temp/"
                     		deployDir="/tmp/war-deploy/"
