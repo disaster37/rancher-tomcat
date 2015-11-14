@@ -49,7 +49,6 @@ RUN touch /firstrun
 
 EXPOSE 8080
 EXPOSE 8009
-VOLUME "/opt/tomcat/webapps"
 WORKDIR /opt/tomcat
 
 # Launch Tomcat
