@@ -96,7 +96,7 @@ class ServiceRun():
         time.sleep(300)
 
     # We set the engine name
-    self.replace_all(TOMCAT_PATH + '/conf/server.xml', re.escape('<Engine name="Catalina" defaultHost="localhost">'), '<Engine name="Catalina" defaultHost="localhost" jvmRoute="' + my_name + '">')
+    #self.replace_all(TOMCAT_PATH + '/conf/server.xml', re.escape('<Engine name="Catalina" defaultHost="localhost">'), '<Engine name="Catalina" defaultHost="localhost" jvmRoute="' + my_name + '">')
 
     # We set the cluster
     cluster_setting = '''
@@ -118,7 +118,7 @@ class ServiceRun():
     cluster_setting += '''
                 </Interceptor>
         </Channel>
-        <Valve className="org.apache.catalina.ha.tcp.ReplicationValve" filter="" />
+        <Valve className="org.apache.catalina.ha.tcp.ReplicationValve" />
         <Valve className="org.apache.catalina.ha.session.JvmRouteBinderValve"/>
         <ClusterListener className="org.apache.catalina.ha.session.ClusterSessionListener"/>
 
@@ -130,7 +130,7 @@ class ServiceRun():
 
     </Cluster>
     '''
-    self.replace_all(TOMCAT_PATH + '/conf/server.xml', re.escape('</Engine>'), cluster_setting + "\n" + '</Engine>')
+    self.replace_all(TOMCAT_PATH + '/conf/server.xml', re.escape('</Host>'), cluster_setting + "\n" + '</Host>')
 
     self.replace_all(TOMCAT_PATH + '/conf/context.xml', re.escape('</Context>'), '<Manager className="org.apache.catalina.ha.session.DeltaManager" expireSessionsOnShutdown="false" notifyListenersOnReplication="true" /></Context>')
 
