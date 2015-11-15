@@ -92,7 +92,7 @@ class ServiceRun():
 
     # If I am not the first container, I wait some times that the first start
     if first_container is False:
-        print("I wait 300s that the first container run before start (issue about cluster")
+        print("I wait 300s that the first container run before start (issue about cluster)")
         time.sleep(300)
 
     # We set the engine name
