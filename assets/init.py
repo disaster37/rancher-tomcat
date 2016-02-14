@@ -71,7 +71,7 @@ class ServiceRun():
     # I get my container info
     my_name = metadata_manager.get_container_name()
     my_ip = metadata_manager.get_container_ip()
-    my_id = metadata_manager.get_container_id()
+    my_id = metadata_manager.get_container_create_index()
 
     # I get the other container info
     list_containers = {}
@@ -80,7 +80,7 @@ class ServiceRun():
     for container_name in list_containers_name:
         if container_name != my_name:
             list_containers[container_name] = {}
-            list_containers[container_name]['id'] = metadata_manager.get_container_id(container_name)
+            list_containers[container_name]['id'] = metadata_manager.get_container_create_index(container_name)
             list_containers[container_name]['name'] = container_name
             list_containers[container_name]['ip'] = metadata_manager.get_container_ip(container_name)
             if list_containers[container_name]['ip'] is None or list_containers[container_name]['ip'] == '':
@@ -91,9 +91,9 @@ class ServiceRun():
                 first_container = False
 
     # If I am not the first container, I wait some times that the first start
-    if first_container is False:
-        print("I wait 300s that the first container run before start (issue about cluster)")
-        time.sleep(300)
+    #if first_container is False:
+    #    print("I wait 300s that the first container run before start (issue about cluster)")
+    #    time.sleep(300)
 
     # We set the engine name
     #self.replace_all(TOMCAT_PATH + '/conf/server.xml', re.escape('<Engine name="Catalina" defaultHost="localhost">'), '<Engine name="Catalina" defaultHost="localhost" jvmRoute="' + my_name + '">')
