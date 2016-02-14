@@ -2,7 +2,7 @@ FROM webcenter/rancher-stack-base:latest
 MAINTAINER Sebastien LANGOUREAUX <linuxworkgroup@hotmail.com>
 
 ENV TOMCAT_BRANCH 8
-ENV TOMCAT_VERSION 8.0.28
+ENV TOMCAT_VERSION 8.0.32
 
 # Force Tomcat to bind on IPV4
 ENV _JAVA_OPTIONS -Djava.net.preferIPv4Stack=true
@@ -53,4 +53,3 @@ WORKDIR /opt/tomcat
 
 # Launch Tomcat
 CMD ["/app/run"]
-
